@@ -31,23 +31,30 @@ def running_time():
 
 async def fetch(url, ioloop, executor):
     try:
-        # print(f'{url} - start task')
-        http_rq = await ioloop.run_in_executor(executor, partial(request.urlopen, url))
-        data = http_rq.read
-        code = http_rq.getcode
-        # sleep(3)
-        print(f'{url} - code {code()} - {bytes_to_human(len(data()))} - {seconds_to_human(running_time())}')
+        http_rq = await ioloop.run_in_executor(executor,
+                                               partial(request.urlopen, url))
+        print(f'Done  - {url}')
+        return url, len(http_rq.read()), running_time(), http_rq.getcode()
     except error.HTTPError as e:
-        print(f'{url} - Exception {e} - {running_time():.2f} sec')
+        print(f'Error - {url}')
+        return url, 0, running_time(), e
 
 
 template = 'http://www.{}.com'
 executor = Executor(len(urls))
 ioloop = asyncio.get_event_loop()
-# ioloop.set_debug(True)
-tasks = [ioloop.create_task(fetch(template.format(url), ioloop, executor)) for url in urls]
+tasks = [ioloop.create_task(fetch(template.format(url), ioloop, executor))
+         for url in urls]
 
 start_time = time()
 ioloop.run_until_complete(asyncio.wait(tasks))
+
+for task in tasks:
+    url, size, seconds, code = task.result()
+    print(f'{url} {bytes_to_human(size)} {seconds_to_human(seconds)} '
+          f'{code}')
+
+    if task.exception():
+        print(f'Exception on {task.exception()}')
 
 ioloop.close()
