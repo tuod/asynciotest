@@ -38,12 +38,14 @@ async def fetch(url, ioloop, executor):
     except error.HTTPError as e:
         print(f'Error - {url}')
         return url, 0, running_time(), e
+    except Exception as e:
+        print(f'Error - {url}')
+        return url, 0, running_time(), e
 
 
-template = 'http://www.{}.com'
 executor = Executor(len(urls))
 ioloop = asyncio.get_event_loop()
-tasks = [ioloop.create_task(fetch(template.format(url), ioloop, executor))
+tasks = [ioloop.create_task(fetch(f'http://www.{url}.com', ioloop, executor))
          for url in urls]
 
 start_time = time()
