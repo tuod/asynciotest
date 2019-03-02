@@ -36,7 +36,7 @@ async def fetch(url, ioloop, executor):
 template = 'http://www.{}.com'
 executor = Executor(len(urls))
 ioloop = asyncio.get_event_loop()
-ioloop.set_debug(True)
+# ioloop.set_debug(True)
 tasks = [ioloop.create_task(fetch(template.format(url), ioloop, executor)) for url in urls]
 
 start_time = time()
